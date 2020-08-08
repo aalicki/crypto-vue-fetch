@@ -8,7 +8,12 @@
         </div>
         <hr>
         <div v-if="this.dataFetched">
-         NAME HERE | {{this.coinSymbol}}
+          <h2>{{this.coinAsset.name}} | {{this.coinSymbol}}</h2>
+          <strong>Price:</strong> ${{Number(this.coinData.price).toLocaleString('en', this.currencyOptions)}}<br>
+          <strong>24-HR Volume:</strong> {{this.coinData.volumePercentChange.change24h}}<br>
+          <strong>$100 = </strong> {{this.purchaseRates[100]}}<br>
+          <strong>$250 =</strong> {{this.purchaseRates[250]}}<br>
+          <strong>$5,000 = </strong> {{this.purchaseRates[5000]}}
         </div>
       </div>
     </div>
@@ -29,25 +34,23 @@ export default {
       dataFetched: false,
       events: [],
       bearer_token: false,
-      coinName: '',
       coinSymbol: this.$route.params.symbol,
-      fetchSymbolsMap: {
-        BTC: true,
-        BCH: true,
-        USDT: true,
-        LTC: true
+      coinAsset: false,
+      coinData: false,
+      currencyOptions: {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
       },
-      coinData: {
-        btcData: true,
-        bchData: true,
-        usdtData: true,
-        ltcData: true
+      purchaseRates: {
+        100: 0,
+        250: 0,
+        5000: 0
       }
     }
   },
   methods: {
     // Fetch Coin asset information
-    fetchCoinID: function (fetchSymbol) {
+    fetchCoinAssetInfo: function (fetchSymbol) {
       axios({
         method: 'GET',
         url: 'https://bravenewcoin.p.rapidapi.com/asset',
@@ -65,10 +68,10 @@ export default {
       })
         .then((response) => {
           // Update our id map with the fetched IDs
-          this.fetchSymbolsMap[fetchSymbol] = response.data.content[0].id
+          this.coinAsset = response.data.content[0]
 
           // Fetch and update our coin data (maybe put this in a loop?)
-          this.fetchCoinData(fetchSymbol, this.fetchSymbolsMap[fetchSymbol])
+          this.fetchCoinData(fetchSymbol, this.coinAsset.id)
         })
         .catch((error) => {
           console.log(error)
@@ -88,16 +91,29 @@ export default {
           useQueryString: true
         },
         params: {
-          assetId: symbolID
+          assetId: symbolID,
+          percentChange: true
         }
       })
         .then((response) => {
+          console.log(response.data)
+
           // update our coin data
-          this.coinData[symbol] = response.data.content[0]
+          this.coinData = response.data.content[0]
+
+          // calculate our purchase amounts
+          this.calculatePurchaseForUSD(100)
+          this.calculatePurchaseForUSD(250)
+          this.calculatePurchaseForUSD(5000)
         })
         .catch((error) => {
           console.log(error)
         })
+    },
+
+    // Calculate the purchase rates
+    calculatePurchaseForUSD: function (amount) {
+      this.purchaseRates[amount] = amount / this.coinData.price
     }
   },
   mounted () {
@@ -134,7 +150,7 @@ export default {
       })
       .then(() => {
         // Set our token IDs
-        this.fetchCoinID('BCH')
+        this.fetchCoinAssetInfo(this.coinSymbol)
       })
       .catch((error) => {
         console.log(error)
