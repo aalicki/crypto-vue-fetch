@@ -2,53 +2,14 @@
   <div class="home page">
     <div class="row">
       <div class="container">
+        <h1>{{ msg }}</h1>
         <div v-if="!this.dataFetched" class="loading">
           Loading...
         </div>
         <hr>
-
-        <table class="table" v-if="this.dataFetched">
-          <thead>
-          <th>Coin Name</th>
-          <th>Symbol</th>
-          <th>Latest Price</th>
-          <th></th>
-          </thead>
-          <tbody>
-          <tr>
-            <td>BitCoin</td>
-            <td>BTC</td>
-            <td>${{this.coinData.BTC.price}}</td>
-            <td>
-              <button class="btn btn-info" v-on:click="coinDetailClick('BTC')">Details</button>
-            </td>
-          </tr>
-          <tr>
-            <td>BitCoin Cash</td>
-            <td>BCH</td>
-            <td>${{this.coinData.BCH.price}}</td>
-            <td>
-              <button class="btn btn-info" v-on:click="coinDetailClick('BCH')">Details</button>
-            </td>
-          </tr>
-          <tr>
-            <td>Tether</td>
-            <td>USDT</td>
-            <td>${{this.coinData.USDT.price}}</td>
-            <td>
-              <button class="btn btn-info" v-on:click="coinDetailClick('USDT')">Details</button>
-            </td>
-          </tr>
-          <tr>
-            <td>LiteCoin</td>
-            <td>LTC</td>
-            <td>${{this.coinData.LTC.price}}</td>
-            <td>
-              <button class="btn btn-info" v-on:click="coinDetailClick('LTC')">Details</button>
-            </td>
-          </tr>
-          </tbody>
-        </table>
+        <div v-if="this.dataFetched">
+         NAME HERE | {{this.coinSymbol}}
+        </div>
       </div>
     </div>
   </div>
@@ -57,18 +18,19 @@
 <script>
 import { RAPID_API_KEY } from '../.env'
 import axios from 'axios'
-import router from '@/router'
 
 export default {
-  name: 'IndexPage',
+  name: 'CoinDetailPage',
   components: {
   },
   data () {
     return {
-      msg: 'CrytpoTracker',
+      msg: 'CrytpoTracker: Coin Details',
       dataFetched: false,
       events: [],
       bearer_token: false,
+      coinName: '',
+      coinSymbol: this.$route.params.symbol,
       fetchSymbolsMap: {
         BTC: true,
         BCH: true,
@@ -136,11 +98,6 @@ export default {
         .catch((error) => {
           console.log(error)
         })
-    },
-
-    // Send user to the coin details page to view data
-    coinDetailClick: function (toSymbol) {
-      router.push(`coin-details?symbol=${toSymbol}`)
     }
   },
   mounted () {
@@ -152,6 +109,8 @@ export default {
     }, 2000)
   },
   created () {
+    console.log('route', this.$route.params.symbol)
+
     // Get our Auth Token
     axios({
       method: 'POST',
@@ -176,9 +135,6 @@ export default {
       .then(() => {
         // Set our token IDs
         this.fetchCoinID('BCH')
-        this.fetchCoinID('BTC')
-        this.fetchCoinID('LTC')
-        this.fetchCoinID('USDT')
       })
       .catch((error) => {
         console.log(error)
