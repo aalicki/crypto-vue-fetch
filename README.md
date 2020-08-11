@@ -1,3 +1,6 @@
+## NOTE
+This was a code challenge, meant to serve as an example of how to connect to an API, fetch some data, and return it in the view. Some of the methods presented are not the best practices. Given more time, I would have utilized things correctly (Promise listeners, better code structure, less tightly coupled methods, etc...)
+
 ### `.env.js`
 Environment variables.
 
